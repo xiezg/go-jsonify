@@ -1,13 +1,13 @@
 package jsonify
 
 import (
+	"database/sql"
 	"encoding/json"
 	"strconv"
 	"strings"
-	"database/sql"
 )
 
-func Jsonify(rows *sql.Rows) ([]string) {
+func Jsonify(rows *sql.Rows) []string {
 	columns, err := rows.Columns()
 	if err != nil {
 		panic(err.Error())
@@ -36,22 +36,21 @@ func Jsonify(rows *sql.Rows) ([]string) {
 
 		for i, value := range values {
 			switch value.(type) {
-				case nil:
-					results[columns[i]] = nil
+			case nil:
+				results[columns[i]] = nil
 
-				case []byte:
-					s := string(value.([]byte))
-					x, err := strconv.Atoi(s)
+			case []byte:
+				s := string(value.([]byte))
+				x, err := strconv.Atoi(s)
 
-					if err != nil {
-						results[columns[i]] = s
-					} else {
-						results[columns[i]] = x
-					}
+				if err != nil {
+					results[columns[i]] = s
+				} else {
+					results[columns[i]] = x
+				}
 
-
-				default:
-					results[columns[i]] = value
+			default:
+				results[columns[i]] = value
 			}
 		}
 
@@ -63,7 +62,7 @@ func Jsonify(rows *sql.Rows) ([]string) {
 	return data
 }
 
-func JsonifyMap(rows *sql.Rows) ( []map[string]interface{}, error ) {
+func JsonifyMap(rows *sql.Rows) ([]map[string]interface{}, error) {
 	columns, err := rows.Columns()
 	if err != nil {
 		return nil, err
@@ -76,11 +75,11 @@ func JsonifyMap(rows *sql.Rows) ( []map[string]interface{}, error ) {
 		scanArgs[i] = &values[i]
 	}
 
-    list := make( []map[string]interface{}, 0 )
+	list := make([]map[string]interface{}, 0)
 
 	for rows.Next() {
 
-	    results := make(map[string]interface{})
+		results := make(map[string]interface{})
 		err = rows.Scan(scanArgs...)
 		if err != nil {
 			return nil, err
@@ -88,28 +87,26 @@ func JsonifyMap(rows *sql.Rows) ( []map[string]interface{}, error ) {
 
 		for i, value := range values {
 			switch value.(type) {
-				case nil:
-					results[columns[i]] = nil
+			case nil:
+				results[columns[i]] = nil
 
-				case []byte:
-					s := string(value.([]byte))
-					x, err := strconv.Atoi(s)
+			case []byte:
+				s := string(value.([]byte))
+				x, err := strconv.Atoi(s)
 
-					if err != nil {
-						results[columns[i]] = s
-					} else {
-						results[columns[i]] = x
-					}
+				if err != nil {
+					results[columns[i]] = s
+				} else {
+					results[columns[i]] = x
+				}
 
-
-				default:
-					results[columns[i]] = value
+			default:
+				results[columns[i]] = value
 			}
 		}
 
-        list = append( list, results )
+		list = append(list, results)
 	}
 
 	return list, nil
 }
-
