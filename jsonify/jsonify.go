@@ -62,3 +62,54 @@ func Jsonify(rows *sql.Rows) ([]string) {
 
 	return data
 }
+
+func JsonifyMap(rows *sql.Rows) ( []map[string]interface{}, error ) {
+	columns, err := rows.Columns()
+	if err != nil {
+		return nil, err
+	}
+
+	values := make([]interface{}, len(columns))
+
+	scanArgs := make([]interface{}, len(values))
+	for i := range values {
+		scanArgs[i] = &values[i]
+	}
+
+    list := make( []map[string]interface{}, 0 )
+
+	for rows.Next() {
+
+	    results := make(map[string]interface{})
+		err = rows.Scan(scanArgs...)
+		if err != nil {
+			return nil, err
+		}
+
+		for i, value := range values {
+			switch value.(type) {
+				case nil:
+					results[columns[i]] = nil
+
+				case []byte:
+					s := string(value.([]byte))
+					x, err := strconv.Atoi(s)
+
+					if err != nil {
+						results[columns[i]] = s
+					} else {
+						results[columns[i]] = x
+					}
+
+
+				default:
+					results[columns[i]] = value
+			}
+		}
+
+        list = append( list, results )
+	}
+
+	return list, nil
+}
+
